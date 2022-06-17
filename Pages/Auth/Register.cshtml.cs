@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Teachy.Pages.Auth;
 
-public class LoginModel : PageModel
+public class RegisterModel : PageModel
 {
-    public async Task OnGet(string redirectUri)
+    public async Task OnGet(string redirectUri, string role)
     {
         var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
             .WithRedirectUri(redirectUri)
+            .WithParameter("role", role)
             .Build();
 
         await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);

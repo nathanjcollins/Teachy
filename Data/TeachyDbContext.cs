@@ -7,7 +7,7 @@ namespace Teachy.Data
     {
         public DbSet<UserProfile> UserProfiles { get; set; } = null!;
         public DbSet<Class> Classes { get; set; } = null!;
-        public DbSet<ClassStudent> ClassStudents { get; set; } = null!;
+        public DbSet<ClassMember> ClassMembers { get; set; } = null!;
 
         public TeachyDbContext(DbContextOptions<TeachyDbContext> options) : base(options)
         { }

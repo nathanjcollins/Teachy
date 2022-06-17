@@ -4,6 +4,7 @@
 @inject ClassService ClassService
 
 <PageTitle>Classes</PageTitle>
+<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
 <MudText Typo="Typo.h3" GutterBottom="true">Classes</MudText>
 
 @if (!_loaded)
@@ -12,24 +13,15 @@
 }
 else
 {
-    @if (!_addNew)
-    {
-        <MudButton Class="mb-2" OnClick="() => _addNew = true" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New</MudButton>
-    }
-    else
-    {
-        <MudPaper Class="pa-4 mb-2">
-            <MudTextField Class="mb-2" @bind-Value="_addNewName" Label="Class Name" Variant="Variant.Text"></MudTextField>
-            <MudButton OnClick="AddNewAsync" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary">Save</MudButton>
-            <MudButton OnClick="() => _addNew = false" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Secondary">Cancel</MudButton>
-        </MudPaper>
-    }
+    <MudButton Class="mb-2" Href="classes/new" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Create New</MudButton>
+    <MudText Inline="true">Or</MudText>
+    <MudButton Class="mb-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Secondary">Join existing</MudButton>
 
     <MudPaper Class="pa-4">
         <MudList Clickable="true">
             @foreach (var c in _classes)
             {
-                <MudListItem Href="@($"classes/{c.Id}")">@c.Name <MudText Inline="true" Typo="Typo.caption" style="float: right">Students: @c.ClassStudents.Count</MudText></MudListItem>
+                <MudListItem Href="@($"classes/{c.Id}")">@c.Name <MudText Inline="true" Typo="Typo.caption" style="float: right">Students: @c.ClassMembers.Count</MudText></MudListItem>
             }
         </MudList>
     </MudPaper>
@@ -41,8 +33,11 @@ else
     private List<Class> _classes = null!;
 
     private bool _loaded = false;
-    private bool _addNew;
-    private string _addNewName = string.Empty;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+	{
+		new BreadcrumbItem("Classes", href: null, disabled: true)
+	};
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,14 +47,4 @@ else
 
         _loaded = true;
     }
-
-    private async Task AddNewAsync()
-    {
-        var newClass = await ClassService.AddNewAsync(_addNewName, _userId);
-        _classes.Add(newClass);
-
-        _addNewName = string.Empty;
-        _addNew = false;
-    }
-
 }

@@ -1,0 +1,40 @@
+﻿@page "/classes/new"
+@using Teachy.Services
+@inject ClassService ClassService
+@inject NavigationManager NavigationManager
+
+<PageTitle>New Class</PageTitle>
+<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
+<MudText Typo="Typo.h3" GutterBottom="true">New Class</MudText>
+
+<MudPaper Class="pa-4">
+	<MudForm @bind-IsValid="@_success" @bind-Errors="@_errors">
+		<MudTextField @bind-Value="_className" Class="mb-2" T="string" Label="Class Name" Required="true" RequiredError="Class name is required!"/>
+
+		<MudButton OnClick="CreateAsync" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success || _saving)" Class="ml-auto">Create</MudButton>
+	</MudForm>
+</MudPaper>
+
+@code {
+	[CascadingParameter(Name = "UserId")] private int _userId { get; set; }
+
+	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+	{
+		new BreadcrumbItem("Classes", href: "classes"),
+		new BreadcrumbItem("New Class", href: null, disabled: true)
+	};
+
+	private bool _success;
+	private string[] _errors = { };
+	private bool _saving;
+	private string _className = string.Empty;
+
+	private async Task CreateAsync()
+	{
+		_saving = true;
+
+		var newClass = await ClassService.AddNewAsync(_className, _userId);
+
+		NavigationManager.NavigateTo($"classes/{newClass.Id}");
+	}
+}

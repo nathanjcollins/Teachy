@@ -13,6 +13,6 @@ namespace Teachy.Data.Models
 
         public string LastName { get; set; } = null!;
 
-        public ICollection<ClassStudent> ClassStudents { get; set; } = null!;
+        public ICollection<ClassMember> ClassMembers { get; set; } = null!;
     }
 }

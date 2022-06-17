@@ -31,16 +31,16 @@ namespace Teachy.Services
         public async Task<List<Class>> GetClassesByUserIdAsync(int userId)
         {
             return await _dbContext.Classes
-                .Include(x => x.ClassStudents)
-                .Where(x => x.OwnerId == userId || x.ClassStudents.Any(y => y.StudentId == userId))
+                .Include(x => x.ClassMembers)
+                .Where(x => x.OwnerId == userId || x.ClassMembers.Any(y => y.MemberId == userId))
                 .ToListAsync();
         }
 
         public async Task<Class?> GetByIdAsync(int id)
         {
             return await _dbContext.Classes
-                .Include(x => x.ClassStudents)
-                    .ThenInclude(x => x.Student)
+                .Include(x => x.ClassMembers)
+                    .ThenInclude(x => x.Member)
                 .SingleOrDefaultAsync(x => x.Id == id);
         }
     }

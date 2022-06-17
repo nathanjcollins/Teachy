@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teachy.Data.Models
 {
-    public class ClassStudent
+    public class ClassMember
     {
         [Key]
         public int Id { get; set; }
@@ -13,7 +13,7 @@ namespace Teachy.Data.Models
         public virtual Class Class { get; set; } = null!;
 
         [ForeignKey("UserProfile")]
-        public int StudentId { get; set; }
-        public virtual UserProfile Student { get; set; } = null!;
+        public int MemberId { get; set; }
+        public virtual UserProfile Member { get; set; } = null!;
     }
 }

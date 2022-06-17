@@ -14,7 +14,35 @@
 	{
 		<PageTitle>@_class.Name</PageTitle>
 		<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
-		<MudText Typo="Typo.h3" GutterBottom="true">@_class.Name</MudText>
+		<MudText Typo="Typo.h3">@_class.Name</MudText>
+		<MudText Typo="Typo.caption" GutterBottom="true">Invite Code: @_class.InviteCode</MudText>
+
+		<MudTabs Outlined="true" Elevation="2" Position="Position.Left" Rounded="true" Border="true"
+			ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
+			<MudTabPanel Text="Resources" Icon="@Icons.Material.Filled.Article">
+				<MudText>Resources</MudText>
+			</MudTabPanel>
+			<MudTabPanel Text="Students" Icon="@Icons.Material.Filled.Person">
+				<MudSimpleTable Hover="true" FixedHeader="true" Style="width: 100%">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Email</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Bob</td>
+							<td>Bob@test.com</td>
+						</tr>
+						<tr>
+							<td>Bob2</td>
+							<td>Bob2@test.com</td>
+						</tr>
+					</tbody>
+				</MudSimpleTable>
+			</MudTabPanel>
+		</MudTabs>
 	}
 }
 

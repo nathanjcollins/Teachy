@@ -10,10 +10,12 @@ namespace Teachy.Data.Models
 
         public string Name { get; set; } = null!;
 
+        public Guid InviteCode { get; set; } = Guid.NewGuid();
+
         [ForeignKey("UserProfile")]
         public int OwnerId { get; set; }
         public virtual UserProfile Owner { get; set; } = null!;
 
-        public ICollection<ClassStudent> ClassStudents { get; set; } = null!;
+        public ICollection<ClassMember> ClassMembers { get; set; } = null!;
     }
 }
