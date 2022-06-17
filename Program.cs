@@ -2,12 +2,13 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Teachy.Data;
+using Teachy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<TeachyDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString), ServiceLifetime.Transient);
 
 builder.Services
     .AddAuth0WebAppAuthentication(options => {
@@ -18,8 +19,10 @@ builder.Services
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddMudServices();
+
+builder.Services.AddTransient<UserProfileService>();
+builder.Services.AddTransient<ClassService>();
 
 var app = builder.Build();
 

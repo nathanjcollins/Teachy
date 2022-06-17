@@ -1,5 +1,10 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthState
+@using System.Security.Claims
+@using Teachy.Data.Models
+@using Teachy.Services
 @using Teachy.Shared.Auth
+@inject UserProfileService UserProfileService
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -21,14 +26,46 @@
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
-            @Body
+            <CascadingValue Value="@_userId" Name="UserId">
+                @Body
+            </CascadingValue>
         </MudContainer>
     </MudMainContent>
 </MudLayout>
 
 @code {
-    private bool _drawerOpen = true;
     private readonly MudTheme _theme = new();
+
+    private bool _drawerOpen = true;
+    private int _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState.GetAuthenticationStateAsync();
+
+        @if (state.User.Identity!.IsAuthenticated)
+        {
+            var auth0Id = state.User.Claims.Single(x => x.Type == ClaimTypes.NameIdentifier).Value;
+
+		    var userProfile = await UserProfileService.GetByAuth0IdAsync(auth0Id);
+
+		    if (userProfile is null)
+		    {
+			    userProfile = new UserProfile
+				    {
+					    FirstName = state.User.Claims.SingleOrDefault(x => x.Type == ClaimTypes.GivenName)?.Value ?? string.Empty,
+					    LastName = state.User.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Surname)?.Value ?? string.Empty,
+					    Auth0Id = auth0Id
+				    };
+
+			    userProfile = await UserProfileService.UpdateAsync(userProfile);
+		    }
+
+            _userId = userProfile.Id;
+        }
+
+        await base.OnInitializedAsync();
+    }
 
     void DrawerToggle()
     {

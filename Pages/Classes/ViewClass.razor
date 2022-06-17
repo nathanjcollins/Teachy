@@ -1,0 +1,43 @@
+﻿@page "/classes/{id:int}"
+@using Teachy.Data.Models
+@using Teachy.Services
+@inject ClassService ClassService
+
+@if (_loaded)
+{
+	@if (_class is null)
+	{
+		<PageTitle>Error</PageTitle>
+		<MudText Typo="Typo.h3" GutterBottom="true">Class @id does not exist</MudText>
+	}
+	else
+	{
+		<PageTitle>@_class.Name</PageTitle>
+		<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
+		<MudText Typo="Typo.h3" GutterBottom="true">@_class.Name</MudText>
+	}
+}
+
+@code {
+	[Parameter]
+	public int id { get; set; }
+
+	private bool _loaded;
+	private Class? _class;
+	private List<BreadcrumbItem> _breadcrumbItems;
+
+	protected override async Task OnInitializedAsync()
+	{
+		_class = await ClassService.GetByIdAsync(id);
+
+		_breadcrumbItems = new List<BreadcrumbItem>
+		{
+			new BreadcrumbItem("Classes", href: "classes"),
+			new BreadcrumbItem(_class?.Name ?? "Error", href: null, disabled: true)
+		};
+
+		await base.OnInitializedAsync();
+
+		_loaded = true;
+	}
+}

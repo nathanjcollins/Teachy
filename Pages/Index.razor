@@ -1,8 +1,16 @@
 ﻿@page "/"
+@using Teachy.Data.Models
+@using Teachy.Services
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthState
+@inject UserProfileService UserProfileService
 @attribute [Authorize]
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Teachy</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-<MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
+<MudText Typo="Typo.h3" GutterBottom="true">Hello, welcome to Teachy!</MudText>
+<MudText Class="mb-8">Start by checking at the available resources, or by creating your classes <MudLink Href="classes">here</MudLink>!</MudText>
+
+@code {
+	private MudTheme _theme = new();
+}

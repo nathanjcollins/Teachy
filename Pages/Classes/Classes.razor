@@ -1,6 +1,65 @@
 @page "/classes"
-<h3>Classes</h3>
+@using Teachy.Data.Models
+@using Teachy.Services
+@inject ClassService ClassService
+
+<PageTitle>Classes</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Classes</MudText>
+
+@if (!_loaded)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+else
+{
+    @if (!_addNew)
+    {
+        <MudButton Class="mb-2" OnClick="() => _addNew = true" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New</MudButton>
+    }
+    else
+    {
+        <MudPaper Class="pa-4 mb-2">
+            <MudTextField Class="mb-2" @bind-Value="_addNewName" Label="Class Name" Variant="Variant.Text"></MudTextField>
+            <MudButton OnClick="AddNewAsync" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary">Save</MudButton>
+            <MudButton OnClick="() => _addNew = false" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Secondary">Cancel</MudButton>
+        </MudPaper>
+    }
+
+    <MudPaper Class="pa-4">
+        <MudList Clickable="true">
+            @foreach (var c in _classes)
+            {
+                <MudListItem Href="@($"classes/{c.Id}")">@c.Name <MudText Inline="true" Typo="Typo.caption" style="float: right">Students: @c.ClassStudents.Count</MudText></MudListItem>
+            }
+        </MudList>
+    </MudPaper>
+}
 
 @code {
-    
+    [CascadingParameter(Name = "UserId")] private int _userId { get; set; }
+
+    private List<Class> _classes = null!;
+
+    private bool _loaded = false;
+    private bool _addNew;
+    private string _addNewName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _classes = await ClassService.GetClassesByUserIdAsync(_userId);
+
+        await base.OnInitializedAsync();
+
+        _loaded = true;
+    }
+
+    private async Task AddNewAsync()
+    {
+        var newClass = await ClassService.AddNewAsync(_addNewName, _userId);
+        _classes.Add(newClass);
+
+        _addNewName = string.Empty;
+        _addNew = false;
+    }
+
 }
