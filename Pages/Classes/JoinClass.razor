@@ -1,0 +1,72 @@
+﻿@page "/classes/join"
+@using Teachy.Services
+@inject ClassService ClassService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Join Class</PageTitle>
+<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
+<MudText Typo="Typo.h3" GutterBottom="true">Join Class</MudText>
+
+<MudPaper Class="pa-4">
+	<MudForm @bind-IsValid="@_success">
+		<MudTextField @onblur="ValidateAsync" @bind-Value="_inviteCode" Class="mb-2" T="string" Label="Invite Code" Required="true" RequiredError="Invite Code is required!"/>
+		<MudButton OnClick="JoinAsync" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success || !_valid.GetValueOrDefault() || _saving)" Class="ml-auto">Join</MudButton>
+		@if (_validating)
+		{
+			<MudProgressCircular Size="Size.Small" Color="Color.Default" Indeterminate="true" />
+		}
+		else if (_valid.HasValue)
+		{
+			<MudIcon Style="vertical-align: middle" Icon="@(_valid.Value ? Icons.Material.Filled.Check : Icons.Material.Filled.Clear)" Color="@(_valid.Value ? Color.Success : Color.Error)" Title="Valid" />
+			<MudText Typo="Typo.caption">@(_valid.Value ? "Valid invite code" : "Invalid invite code")</MudText>
+			
+		}
+	</MudForm>
+</MudPaper>
+
+@code {
+	[CascadingParameter(Name = "UserId")] private int _userId { get; set; }
+
+	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+	{
+		new BreadcrumbItem("Classes", href: "classes"),
+		new BreadcrumbItem("Join Class", href: null, disabled: true)
+	};
+
+	private bool _success;
+	private bool _saving;
+	private string _inviteCode = string.Empty;
+
+	private bool _validating;
+	private bool? _valid = null;
+
+	private async Task JoinAsync()
+	{
+		_saving = true;
+
+		var joinedClass = await ClassService.JoinAsync(new Guid(_inviteCode), _userId);
+
+		NavigationManager.NavigateTo($"classes/{joinedClass.Id}");
+	}
+
+	private async Task ValidateAsync()
+	{
+		if (string.IsNullOrEmpty(_inviteCode))
+		{
+			_valid = null;
+			return;
+		}
+
+		if (!Guid.TryParse(_inviteCode, out var _inviteCodeGuid))
+		{
+			_valid = false;
+			return;
+		}
+
+		_validating = true;
+
+		_valid = await ClassService.ValidateInviteCodeAsync(_inviteCodeGuid);
+
+		_validating = false;
+	}
+}

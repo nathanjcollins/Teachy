@@ -8,7 +8,7 @@
 <MudText Typo="Typo.h3" GutterBottom="true">New Class</MudText>
 
 <MudPaper Class="pa-4">
-	<MudForm @bind-IsValid="@_success" @bind-Errors="@_errors">
+	<MudForm @bind-IsValid="@_success">
 		<MudTextField @bind-Value="_className" Class="mb-2" T="string" Label="Class Name" Required="true" RequiredError="Class name is required!"/>
 
 		<MudButton OnClick="CreateAsync" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success || _saving)" Class="ml-auto">Create</MudButton>
@@ -25,7 +25,6 @@
 	};
 
 	private bool _success;
-	private string[] _errors = { };
 	private bool _saving;
 	private string _className = string.Empty;
 

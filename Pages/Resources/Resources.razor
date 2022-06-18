@@ -1,0 +1,12 @@
+﻿@page "/resources"
+
+<PageTitle>Resources</PageTitle>
+<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
+<MudText Typo="Typo.h3" GutterBottom="true">Resources</MudText>
+
+@code {
+	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+	{
+		new BreadcrumbItem("Resources", href: null, disabled: true)
+	};
+}
