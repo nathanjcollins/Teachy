@@ -13,6 +13,8 @@ namespace Teachy.Data
         public DbSet<Resource> Resources { get; set; } = null!;
         public DbSet<Author> Authors { get; set; } = null!;
         public DbSet<Country> Countries { get; set; } = null!;
+        public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<SubCategory> SubCategories { get; set; } = null!;
 
         public TeachyDbContext(DbContextOptions<TeachyDbContext> options) : base(options)
         { }

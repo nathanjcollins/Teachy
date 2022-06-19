@@ -1,0 +1,54 @@
+﻿@using Teachy.Data.Models
+@using Teachy.Services
+@inject CountryService CountryService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            Delete server?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="@_isValid">
+            <MudTextField Required="true" RequiredError="First name is required!" @bind-Value="@_author.FirstName" Label="First Name"/>
+            <MudTextField Required="true" RequiredError="Last name is required!" @bind-Value="@_author.LastName" Label="Last Name"/>
+            <MudAutocomplete Label="Country of Origin" T="Country" @bind-Value="_author.CountryOfOrigin" SearchFunc="SearchCountriesAsync"
+                ToStringFunc="@((c) => c?.Name)"/>
+            <MudDatePicker Label="Date of Birth" @bind-Date="@_author.DateOfBirth"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="!_isValid" Color="Color.Primary" OnClick="AddAuthor">Add Author</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    private Author _author = new();
+    private bool _isValid;
+
+    private async Task<IEnumerable<Country>> SearchCountriesAsync(string value)
+    {
+        var countries = await CountryService.GetAllAsync();
+
+        if (string.IsNullOrEmpty(value))
+        {
+            return countries;
+        }
+
+        return countries.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void AddAuthor()
+    {
+        MudDialog.Close(DialogResult.Ok(_author));
+    }
+}

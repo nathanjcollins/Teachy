@@ -1,0 +1,112 @@
+﻿@page "/resources/new"
+@using Teachy.Data.Enums
+@using Teachy.Data.Models
+@using Teachy.Services
+@using Teachy.Shared.Dialogs
+@inject AuthorService AuthorService
+@inject CountryService CountryService
+@inject ResourceTypeService ResourceTypeService
+@inject IDialogService DialogService
+
+<PageTitle>New Resource</PageTitle>
+<MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
+<MudText Typo="Typo.h3" GutterBottom="true">New Resource</MudText>
+
+@if (!_loaded)
+{
+	<MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+	<MudForm @bind-IsValid="@_success" @bind-Errors="@_errors">
+		<MudTextField T="string" Class="mb-6" Label="Resource Name" Required="true" RequiredError="Resource name is required!"/>
+
+		<MudText>Resource Type:</MudText>
+		<MudRadioGroup T="ResourceType" @bind-SelectedOption="@_resourceType">
+			@foreach (var type in _resourceTypes)
+			{
+				<MudRadio Option="@(type)" Color="Color.Primary">@type.Name</MudRadio>
+			}
+		</MudRadioGroup>
+
+		@if (_resourceType.Id == ResourceTypeEnum.Uri)
+		{
+			<MudTextField T="string" Label="Resource URI" Required="true" RequiredError="Resource URI is required!"/>
+		}
+		else
+		{
+			<InputFile id="fileInput" hidden multiple />
+
+			<MudButton HtmlTag="label"
+					   Variant="Variant.Filled"
+					   Color="Color.Primary"
+					   StartIcon="@Icons.Filled.CloudUpload"
+					   for="fileInput">
+				Upload Document
+			</MudButton>
+		}
+
+		<MudAutocomplete T="Author" Label="Author" @bind-Value="_author"
+			SearchFunc="@SearchAuthors" ToStringFunc="@(a => a == null ? null : $"{a.FirstName} {a.LastName}")"
+			AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddAuthor"/>
+	</MudForm>
+}
+
+@code {
+	[CascadingParameter(Name = "UserId")] private int _userId { get; set; }
+
+	private bool _loaded;
+
+	private List<Author> _authors = null!;
+	//private List<Country> _countries = null!;
+	private List<ResourceType> _resourceTypes = null!;
+
+	private bool _success;
+	private string[] _errors = { };
+
+	private Author? _author;
+	private ResourceType _resourceType = null!;
+
+	protected override async Task OnInitializedAsync()
+	{
+		_authors = await AuthorService.GetAllAsync();
+		//_countries = await CountryService.GetAllAsync();
+		_resourceTypes = ResourceTypeService.GetAll();
+
+		await base.OnInitializedAsync();
+
+		_resourceType = _resourceTypes.Single(x => x.Id == ResourceTypeEnum.Uri);
+
+		_loaded = true;
+	}
+
+	private Task<IEnumerable<Author>> SearchAuthors(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			return Task.FromResult(_authors.AsEnumerable());
+		}
+
+		return Task.FromResult(_authors.Where(x => $"{x.FirstName} {x.LastName}".Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+	}
+
+	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
+	{
+		new BreadcrumbItem("Resources", href: "resources"),
+		new BreadcrumbItem("New Resouce", href: null, disabled: true)
+	};
+
+	private async Task AddAuthor()
+	{
+		var dialog = DialogService.Show<NewAuthorDialog>("Add Author");
+
+		var result = await dialog.Result;
+
+		if(!result.Cancelled)
+		{
+			var author = (Author)result.Data;
+			_authors.Add(author);
+			_author = author;
+		}
+	}
+}

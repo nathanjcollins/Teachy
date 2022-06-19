@@ -1,5 +1,6 @@
 using Auth0.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 using Teachy.Data;
 using Teachy.Services;
@@ -23,6 +24,9 @@ builder.Services.AddMudServices();
 
 builder.Services.AddTransient<UserProfileService>();
 builder.Services.AddTransient<ClassService>();
+builder.Services.AddTransient<AuthorService>();
+builder.Services.AddTransient<CountryService>();
+builder.Services.AddTransient<ResourceTypeService>();
 
 var app = builder.Build();
 
