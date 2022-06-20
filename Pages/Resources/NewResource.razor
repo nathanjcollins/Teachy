@@ -3,9 +3,10 @@
 @using Teachy.Data.Models
 @using Teachy.Services
 @using Teachy.Shared.Dialogs
+@using System.ComponentModel.DataAnnotations
 @inject AuthorService AuthorService
-@inject CountryService CountryService
 @inject ResourceTypeService ResourceTypeService
+@inject CategoryService CategoryService
 @inject IDialogService DialogService
 
 <PageTitle>New Resource</PageTitle>
@@ -46,6 +47,11 @@ else
 			</MudButton>
 		}
 
+		<MudAutocomplete T="Category" Label="Category" @bind-Value="_category" CoerceText="false" 
+			CoerceValue="true" SearchFunc="@SearchCategories" ResetValueOnEmptyText="true" 
+			AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddCategory"
+			ToStringFunc="@(c => c?.Name)"/>
+
 		<MudAutocomplete T="Author" Label="Author" @bind-Value="_author"
 			SearchFunc="@SearchAuthors" ToStringFunc="@(a => a == null ? null : $"{a.FirstName} {a.LastName}")"
 			AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddAuthor"/>
@@ -58,7 +64,7 @@ else
 	private bool _loaded;
 
 	private List<Author> _authors = null!;
-	//private List<Country> _countries = null!;
+	private List<Category> _categories = null!;
 	private List<ResourceType> _resourceTypes = null!;
 
 	private bool _success;
@@ -66,11 +72,12 @@ else
 
 	private Author? _author;
 	private ResourceType _resourceType = null!;
+	private Category? _category;
 
 	protected override async Task OnInitializedAsync()
 	{
 		_authors = await AuthorService.GetAllAsync();
-		//_countries = await CountryService.GetAllAsync();
+		_categories = await CategoryService.GetAllAsync();
 		_resourceTypes = ResourceTypeService.GetAll();
 
 		await base.OnInitializedAsync();
@@ -90,16 +97,42 @@ else
 		return Task.FromResult(_authors.Where(x => $"{x.FirstName} {x.LastName}".Contains(value, StringComparison.InvariantCultureIgnoreCase)));
 	}
 
+	private Task<IEnumerable<Category>> SearchCategories(string value)
+	{
+		if(string.IsNullOrEmpty(value))
+		{
+			return Task.FromResult(_categories.AsEnumerable());
+		}
+
+		return Task.FromResult(_categories.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+	}
+
 	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
 	{
 		new BreadcrumbItem("Resources", href: "resources"),
 		new BreadcrumbItem("New Resouce", href: null, disabled: true)
 	};
 
+	private async Task AddCategory()
+	{
+		var parameters = new DialogParameters();
+		parameters.Add("TitleText", "Add Category");
+		parameters.Add("FieldName", "Category Name");
+
+		var dialog = DialogService.Show<SimpleTextInputDialog>("Add Category", parameters);
+		var result = await dialog.Result;
+
+		if (!result.Cancelled)
+		{
+			var newCategory = new Category { Name = (string)result.Data };
+			_categories.Add(newCategory);
+			_category = newCategory;
+		}
+	}
+
 	private async Task AddAuthor()
 	{
 		var dialog = DialogService.Show<NewAuthorDialog>("Add Author");
-
 		var result = await dialog.Result;
 
 		if(!result.Cancelled)

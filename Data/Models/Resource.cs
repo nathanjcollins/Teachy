@@ -11,6 +11,10 @@ namespace Teachy.Data.Models
 
         public string Name { get; set; } = null!;
 
+		[ForeignKey("SubCategory")]
+        public int SubCategoryId { get; set; }
+        public virtual SubCategory SubCategory { get; set; } = null!;
+
         [ForeignKey("ResourceType")]
         public ResourceTypeEnum ResourceTypeId { get; set; }
         public virtual ResourceType ResourceType { get; set; } = null!;

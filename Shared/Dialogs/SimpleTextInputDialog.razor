@@ -1,0 +1,43 @@
+﻿@using Teachy.Data.Models
+@using Teachy.Services
+@inject CountryService CountryService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @TitleText
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="@_isValid">
+            <MudTextField Required="true" RequiredError="@($"{FieldName} is required!")" @bind-Value="@_value" Label="@FieldName"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="!_isValid" Color="Color.Primary" OnClick="Save">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public string TitleText { get; set; } = null!;
+
+    [Parameter] public string FieldName { get; set; } = null!;
+
+    [Parameter] public string ButtonText { get; set; } = "Save";
+
+    private string _value = null!;
+    private bool _isValid;
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void Save()
+    {
+        MudDialog.Close(DialogResult.Ok(_value));
+    }
+}

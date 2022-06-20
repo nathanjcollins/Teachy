@@ -12,7 +12,8 @@ builder.Services.AddDbContext<TeachyDbContext>(options =>
     options.UseSqlServer(connectionString), ServiceLifetime.Transient);
 
 builder.Services
-    .AddAuth0WebAppAuthentication(options => {
+    .AddAuth0WebAppAuthentication(options =>
+    {
         options.Domain = builder.Configuration["Auth0:Domain"];
         options.ClientId = builder.Configuration["Auth0:ClientId"];
     });
@@ -27,6 +28,7 @@ builder.Services.AddTransient<ClassService>();
 builder.Services.AddTransient<AuthorService>();
 builder.Services.AddTransient<CountryService>();
 builder.Services.AddTransient<ResourceTypeService>();
+builder.Services.AddTransient<CategoryService>();
 
 var app = builder.Build();
 
@@ -48,6 +50,6 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.UseAuthentication();
-app.UseAuthorization(); 
+app.UseAuthorization();
 
 app.Run();
