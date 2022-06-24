@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Teachy.Data;
 
 #nullable disable
@@ -12,35 +12,39 @@ using Teachy.Data;
 namespace Teachy.Migrations
 {
     [DbContext(typeof(TeachyDbContext))]
-    [Migration("20220618093510_InitialResourceModels")]
-    partial class InitialResourceModels
+    [Migration("20220624141205_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.6")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Teachy.Data.Models.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CountryOfOriginId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("Date");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -49,23 +53,43 @@ namespace Teachy.Migrations
                     b.ToTable("Authors");
                 });
 
+            modelBuilder.Entity("Teachy.Data.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("Teachy.Data.Models.Class", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("InviteCode")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("OwnerId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -78,15 +102,15 @@ namespace Teachy.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClassId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MemberId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -101,13 +125,13 @@ namespace Teachy.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -197,611 +221,596 @@ namespace Teachy.Migrations
                         new
                         {
                             Id = 17,
-                            Name = "Botswana"
-                        },
-                        new
-                        {
-                            Id = 18,
                             Name = "Brazil"
                         },
                         new
                         {
-                            Id = 19,
+                            Id = 18,
                             Name = "Brunei"
                         },
                         new
                         {
-                            Id = 20,
+                            Id = 19,
                             Name = "Bulgaria"
                         },
                         new
                         {
-                            Id = 21,
+                            Id = 20,
                             Name = "Cambodia"
                         },
                         new
                         {
-                            Id = 22,
+                            Id = 21,
                             Name = "Cameroon"
                         },
                         new
                         {
-                            Id = 23,
+                            Id = 22,
                             Name = "Canada"
                         },
                         new
                         {
-                            Id = 24,
-                            Name = "Caribbean"
-                        },
-                        new
-                        {
-                            Id = 25,
+                            Id = 23,
                             Name = "Chile"
                         },
                         new
                         {
-                            Id = 26,
+                            Id = 24,
                             Name = "China"
                         },
                         new
                         {
-                            Id = 27,
+                            Id = 25,
                             Name = "Colombia"
                         },
                         new
                         {
-                            Id = 28,
-                            Name = "Congo (DRC)"
+                            Id = 26,
+                            Name = "Congo - Kinshasa"
                         },
                         new
                         {
-                            Id = 29,
+                            Id = 27,
                             Name = "Costa Rica"
                         },
                         new
                         {
-                            Id = 30,
+                            Id = 28,
                             Name = "Côte d’Ivoire"
                         },
                         new
                         {
-                            Id = 31,
+                            Id = 29,
                             Name = "Croatia"
                         },
                         new
                         {
-                            Id = 32,
+                            Id = 30,
                             Name = "Cuba"
                         },
                         new
                         {
-                            Id = 33,
+                            Id = 31,
                             Name = "Czechia"
                         },
                         new
                         {
-                            Id = 34,
+                            Id = 32,
                             Name = "Denmark"
                         },
                         new
                         {
-                            Id = 35,
+                            Id = 33,
                             Name = "Dominican Republic"
                         },
                         new
                         {
-                            Id = 36,
+                            Id = 34,
                             Name = "Ecuador"
                         },
                         new
                         {
-                            Id = 37,
+                            Id = 35,
                             Name = "Egypt"
                         },
                         new
                         {
-                            Id = 38,
+                            Id = 36,
                             Name = "El Salvador"
                         },
                         new
                         {
-                            Id = 39,
+                            Id = 37,
                             Name = "Eritrea"
                         },
                         new
                         {
-                            Id = 40,
+                            Id = 38,
                             Name = "Estonia"
                         },
                         new
                         {
-                            Id = 41,
+                            Id = 39,
                             Name = "Ethiopia"
                         },
                         new
                         {
-                            Id = 42,
+                            Id = 40,
                             Name = "Faroe Islands"
                         },
                         new
                         {
-                            Id = 43,
+                            Id = 41,
                             Name = "Finland"
                         },
                         new
                         {
-                            Id = 44,
+                            Id = 42,
                             Name = "France"
                         },
                         new
                         {
-                            Id = 45,
+                            Id = 43,
                             Name = "Georgia"
                         },
                         new
                         {
-                            Id = 46,
+                            Id = 44,
                             Name = "Germany"
                         },
                         new
                         {
-                            Id = 47,
+                            Id = 45,
                             Name = "Greece"
                         },
                         new
                         {
-                            Id = 48,
+                            Id = 46,
                             Name = "Greenland"
                         },
                         new
                         {
-                            Id = 49,
+                            Id = 47,
                             Name = "Guatemala"
                         },
                         new
                         {
-                            Id = 50,
+                            Id = 48,
                             Name = "Haiti"
                         },
                         new
                         {
-                            Id = 51,
+                            Id = 49,
                             Name = "Honduras"
                         },
                         new
                         {
-                            Id = 52,
-                            Name = "Hong Kong SAR"
+                            Id = 50,
+                            Name = "Hong Kong SAR China"
                         },
                         new
                         {
-                            Id = 53,
+                            Id = 51,
                             Name = "Hungary"
                         },
                         new
                         {
-                            Id = 54,
+                            Id = 52,
                             Name = "Iceland"
                         },
                         new
                         {
-                            Id = 55,
+                            Id = 53,
                             Name = "India"
                         },
                         new
                         {
-                            Id = 56,
+                            Id = 54,
                             Name = "Indonesia"
                         },
                         new
                         {
-                            Id = 57,
+                            Id = 55,
                             Name = "Iran"
                         },
                         new
                         {
-                            Id = 58,
+                            Id = 56,
                             Name = "Iraq"
                         },
                         new
                         {
-                            Id = 59,
+                            Id = 57,
                             Name = "Ireland"
                         },
                         new
                         {
-                            Id = 60,
+                            Id = 58,
                             Name = "Israel"
                         },
                         new
                         {
-                            Id = 61,
+                            Id = 59,
                             Name = "Italy"
                         },
                         new
                         {
-                            Id = 62,
+                            Id = 60,
                             Name = "Jamaica"
                         },
                         new
                         {
-                            Id = 63,
+                            Id = 61,
                             Name = "Japan"
                         },
                         new
                         {
-                            Id = 64,
+                            Id = 62,
                             Name = "Jordan"
                         },
                         new
                         {
-                            Id = 65,
+                            Id = 63,
                             Name = "Kazakhstan"
                         },
                         new
                         {
-                            Id = 66,
+                            Id = 64,
                             Name = "Kenya"
                         },
                         new
                         {
-                            Id = 67,
-                            Name = "Korea"
-                        },
-                        new
-                        {
-                            Id = 68,
+                            Id = 65,
                             Name = "Kuwait"
                         },
                         new
                         {
-                            Id = 69,
+                            Id = 66,
                             Name = "Kyrgyzstan"
                         },
                         new
                         {
-                            Id = 70,
+                            Id = 67,
                             Name = "Laos"
                         },
                         new
                         {
-                            Id = 71,
+                            Id = 68,
                             Name = "Latin America"
                         },
                         new
                         {
-                            Id = 72,
+                            Id = 69,
                             Name = "Latvia"
                         },
                         new
                         {
-                            Id = 73,
+                            Id = 70,
                             Name = "Lebanon"
                         },
                         new
                         {
-                            Id = 74,
+                            Id = 71,
                             Name = "Libya"
                         },
                         new
                         {
-                            Id = 75,
+                            Id = 72,
                             Name = "Liechtenstein"
                         },
                         new
                         {
-                            Id = 76,
+                            Id = 73,
                             Name = "Lithuania"
                         },
                         new
                         {
-                            Id = 77,
+                            Id = 74,
                             Name = "Luxembourg"
                         },
                         new
                         {
-                            Id = 78,
+                            Id = 75,
                             Name = "Malaysia"
                         },
                         new
                         {
-                            Id = 79,
-                            Name = "Maldives"
-                        },
-                        new
-                        {
-                            Id = 80,
+                            Id = 76,
                             Name = "Mali"
                         },
                         new
                         {
-                            Id = 81,
+                            Id = 77,
                             Name = "Malta"
                         },
                         new
                         {
-                            Id = 82,
+                            Id = 78,
                             Name = "Mexico"
                         },
                         new
                         {
-                            Id = 83,
+                            Id = 79,
                             Name = "Moldova"
                         },
                         new
                         {
-                            Id = 84,
+                            Id = 80,
                             Name = "Monaco"
                         },
                         new
                         {
-                            Id = 85,
+                            Id = 81,
                             Name = "Mongolia"
                         },
                         new
                         {
-                            Id = 86,
+                            Id = 82,
                             Name = "Montenegro"
                         },
                         new
                         {
-                            Id = 87,
+                            Id = 83,
                             Name = "Morocco"
                         },
                         new
                         {
-                            Id = 88,
-                            Name = "Myanmar"
+                            Id = 84,
+                            Name = "Myanmar (Burma)"
                         },
                         new
                         {
-                            Id = 89,
+                            Id = 85,
                             Name = "Nepal"
                         },
                         new
                         {
-                            Id = 90,
+                            Id = 86,
                             Name = "Netherlands"
                         },
                         new
                         {
-                            Id = 91,
+                            Id = 87,
                             Name = "New Zealand"
                         },
                         new
                         {
-                            Id = 92,
+                            Id = 88,
                             Name = "Nicaragua"
                         },
                         new
                         {
-                            Id = 93,
+                            Id = 89,
                             Name = "Nigeria"
                         },
                         new
                         {
-                            Id = 94,
+                            Id = 90,
                             Name = "North Macedonia"
                         },
                         new
                         {
-                            Id = 95,
+                            Id = 91,
                             Name = "Norway"
                         },
                         new
                         {
-                            Id = 96,
+                            Id = 92,
                             Name = "Oman"
                         },
                         new
                         {
-                            Id = 97,
+                            Id = 93,
                             Name = "Pakistan"
                         },
                         new
                         {
-                            Id = 98,
+                            Id = 94,
                             Name = "Panama"
                         },
                         new
                         {
-                            Id = 99,
+                            Id = 95,
                             Name = "Paraguay"
                         },
                         new
                         {
-                            Id = 100,
+                            Id = 96,
                             Name = "Peru"
                         },
                         new
                         {
-                            Id = 101,
+                            Id = 97,
                             Name = "Philippines"
                         },
                         new
                         {
-                            Id = 102,
+                            Id = 98,
                             Name = "Poland"
                         },
                         new
                         {
-                            Id = 103,
+                            Id = 99,
                             Name = "Portugal"
                         },
                         new
                         {
-                            Id = 104,
+                            Id = 100,
                             Name = "Puerto Rico"
                         },
                         new
                         {
-                            Id = 105,
+                            Id = 101,
                             Name = "Qatar"
                         },
                         new
                         {
-                            Id = 106,
+                            Id = 102,
                             Name = "Réunion"
                         },
                         new
                         {
-                            Id = 107,
+                            Id = 103,
                             Name = "Romania"
                         },
                         new
                         {
-                            Id = 108,
+                            Id = 104,
                             Name = "Russia"
                         },
                         new
                         {
-                            Id = 109,
+                            Id = 105,
                             Name = "Rwanda"
                         },
                         new
                         {
-                            Id = 110,
+                            Id = 106,
                             Name = "Saudi Arabia"
                         },
                         new
                         {
-                            Id = 111,
+                            Id = 107,
                             Name = "Senegal"
                         },
                         new
                         {
-                            Id = 112,
+                            Id = 108,
                             Name = "Serbia"
                         },
                         new
                         {
-                            Id = 113,
+                            Id = 109,
                             Name = "Singapore"
                         },
                         new
                         {
-                            Id = 114,
+                            Id = 110,
                             Name = "Slovakia"
                         },
                         new
                         {
-                            Id = 115,
+                            Id = 111,
                             Name = "Slovenia"
                         },
                         new
                         {
-                            Id = 116,
+                            Id = 112,
                             Name = "Somalia"
                         },
                         new
                         {
-                            Id = 117,
+                            Id = 113,
                             Name = "South Africa"
                         },
                         new
                         {
-                            Id = 118,
+                            Id = 114,
+                            Name = "South Korea"
+                        },
+                        new
+                        {
+                            Id = 115,
                             Name = "Spain"
                         },
                         new
                         {
-                            Id = 119,
+                            Id = 116,
                             Name = "Sri Lanka"
                         },
                         new
                         {
-                            Id = 120,
+                            Id = 117,
                             Name = "Sweden"
                         },
                         new
                         {
-                            Id = 121,
+                            Id = 118,
                             Name = "Switzerland"
                         },
                         new
                         {
-                            Id = 122,
+                            Id = 119,
                             Name = "Syria"
                         },
                         new
                         {
-                            Id = 123,
+                            Id = 120,
                             Name = "Thailand"
                         },
                         new
                         {
-                            Id = 124,
+                            Id = 121,
                             Name = "Trinidad & Tobago"
                         },
                         new
                         {
-                            Id = 125,
+                            Id = 122,
                             Name = "Tunisia"
                         },
                         new
                         {
-                            Id = 126,
+                            Id = 123,
                             Name = "Turkey"
                         },
                         new
                         {
-                            Id = 127,
+                            Id = 124,
                             Name = "Turkmenistan"
                         },
                         new
                         {
-                            Id = 128,
+                            Id = 125,
                             Name = "Ukraine"
                         },
                         new
                         {
-                            Id = 129,
+                            Id = 126,
                             Name = "United Arab Emirates"
                         },
                         new
                         {
-                            Id = 130,
+                            Id = 127,
                             Name = "United Kingdom"
                         },
                         new
                         {
-                            Id = 131,
+                            Id = 128,
                             Name = "United States"
                         },
                         new
                         {
-                            Id = 132,
+                            Id = 129,
                             Name = "Uruguay"
                         },
                         new
                         {
-                            Id = 133,
+                            Id = 130,
                             Name = "Uzbekistan"
                         },
                         new
                         {
-                            Id = 134,
+                            Id = 131,
                             Name = "Venezuela"
                         },
                         new
                         {
-                            Id = 135,
+                            Id = 132,
                             Name = "Vietnam"
                         },
                         new
                         {
-                            Id = 136,
+                            Id = 133,
                             Name = "World"
                         },
                         new
                         {
-                            Id = 137,
+                            Id = 134,
                             Name = "Yemen"
                         },
                         new
                         {
-                            Id = 138,
+                            Id = 135,
                             Name = "Zimbabwe"
                         });
                 });
@@ -810,25 +819,28 @@ namespace Teachy.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AuthorId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<byte[]>("FileContent")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("ResourceTypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SubCategoryId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Uri")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -836,17 +848,19 @@ namespace Teachy.Migrations
 
                     b.HasIndex("ResourceTypeId");
 
+                    b.HasIndex("SubCategoryId");
+
                     b.ToTable("Resources");
                 });
 
             modelBuilder.Entity("Teachy.Data.Models.ResourceType", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -865,25 +879,50 @@ namespace Teachy.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Teachy.Data.Models.SubCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("Name", "CategoryId")
+                        .IsUnique();
+
+                    b.ToTable("SubCategories");
+                });
+
             modelBuilder.Entity("Teachy.Data.Models.UserProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Auth0Id")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -943,9 +982,33 @@ namespace Teachy.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Teachy.Data.Models.SubCategory", "SubCategory")
+                        .WithMany()
+                        .HasForeignKey("SubCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Author");
 
                     b.Navigation("ResourceType");
+
+                    b.Navigation("SubCategory");
+                });
+
+            modelBuilder.Entity("Teachy.Data.Models.SubCategory", b =>
+                {
+                    b.HasOne("Teachy.Data.Models.Category", "Category")
+                        .WithMany("SubCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Teachy.Data.Models.Category", b =>
+                {
+                    b.Navigation("SubCategories");
                 });
 
             modelBuilder.Entity("Teachy.Data.Models.Class", b =>

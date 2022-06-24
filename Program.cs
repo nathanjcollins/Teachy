@@ -1,6 +1,5 @@
 using Auth0.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 using MudBlazor.Services;
 using Teachy.Data;
 using Teachy.Services;
@@ -9,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<TeachyDbContext>(options =>
-    options.UseSqlServer(connectionString), ServiceLifetime.Transient);
+    options.UseNpgsql(connectionString), ServiceLifetime.Transient);
 
 builder.Services
     .AddAuth0WebAppAuthentication(options =>

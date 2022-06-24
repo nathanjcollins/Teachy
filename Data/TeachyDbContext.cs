@@ -34,12 +34,20 @@ namespace Teachy.Data
 
             foreach (var culture in cultures)
 			{
-                var region = new RegionInfo(culture.LCID);
-
-                if (!(cultureList.Contains(region.EnglishName)))
+                try
                 {
-                    cultureList.Add(region.EnglishName);
+                    var region = new RegionInfo(culture.LCID);
+
+                    if (!(cultureList.Contains(region.EnglishName)))
+                    {
+                        cultureList.Add(region.EnglishName);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                
             }
 
             cultureList.Sort();
