@@ -26,5 +26,7 @@ namespace Teachy.Data.Models
         [ForeignKey("Author")]
         public int AuthorId { get; set; }
         public virtual Author Author { get; set; } = null!;
+
+        public ICollection<ResourceTag> ResourceTags { get; set; } = null!;
     }
 }

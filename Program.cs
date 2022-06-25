@@ -28,6 +28,9 @@ builder.Services.AddTransient<AuthorService>();
 builder.Services.AddTransient<CountryService>();
 builder.Services.AddTransient<ResourceTypeService>();
 builder.Services.AddTransient<CategoryService>();
+builder.Services.AddTransient<TagService>();
+builder.Services.AddTransient<ResourceService>();
+
 
 var app = builder.Build();
 

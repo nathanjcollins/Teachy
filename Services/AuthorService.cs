@@ -17,5 +17,13 @@ namespace Teachy.Services
 		{
 			return await _dbContext.Authors.ToListAsync();
 		}
+
+		public async Task<Author> UpdateAsync(Author author)
+		{
+			_dbContext.Update(author);
+			await _dbContext.SaveChangesAsync();
+
+			return author;
+		}
 	}
 }

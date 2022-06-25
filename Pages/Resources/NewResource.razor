@@ -1,13 +1,16 @@
 ﻿@page "/resources/new"
 @using Teachy.Data.Enums
 @using Teachy.Data.Models
+@using Teachy.Pages.Resources.Models
 @using Teachy.Services
 @using Teachy.Shared.Dialogs
-@using System.ComponentModel.DataAnnotations
 @inject AuthorService AuthorService
 @inject ResourceTypeService ResourceTypeService
 @inject CategoryService CategoryService
+@inject ResourceService ResourceService
+@inject TagService TagService
 @inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 
 <PageTitle>New Resource</PageTitle>
 <MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
@@ -15,131 +18,263 @@
 
 @if (!_loaded)
 {
-	<MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    <MudProgressCircular Color="Color.Default" Indeterminate="true"/>
 }
 else
 {
-	<MudForm @bind-IsValid="@_success" @bind-Errors="@_errors">
-		<MudTextField T="string" Class="mb-6" Label="Resource Name" Required="true" RequiredError="Resource name is required!"/>
+    <MudForm @bind-IsValid="@_success" @bind-Errors="@_errors">
+        <MudTextField T="string" @bind-Value="@_resourceName" Class="mb-6" Label="Resource Name" Required="true" RequiredError="Resource name is required!"/>
 
-		<MudText>Resource Type:</MudText>
-		<MudRadioGroup T="ResourceType" @bind-SelectedOption="@_resourceType">
-			@foreach (var type in _resourceTypes)
-			{
-				<MudRadio Option="@(type)" Color="Color.Primary">@type.Name</MudRadio>
-			}
-		</MudRadioGroup>
+        <MudText>Resource Type:</MudText>
+        <MudRadioGroup T="ResourceType" @bind-SelectedOption="@_resourceType">
+            @foreach (var type in _resourceTypes)
+            {
+                <MudRadio Option="@(type)" Color="Color.Primary">@type.Name</MudRadio>
+            }
+        </MudRadioGroup>
 
-		@if (_resourceType.Id == ResourceTypeEnum.Uri)
-		{
-			<MudTextField T="string" Label="Resource URI" Required="true" RequiredError="Resource URI is required!"/>
-		}
-		else
-		{
-			<InputFile id="fileInput" hidden multiple />
+        @if (_resourceType.Id == ResourceTypeEnum.Uri)
+        {
+            <MudTextField T="string" @bind-Value="@_uri" Label="Resource URI" Required="true" RequiredError="Resource URI is required!"/>
+        }
+        else
+        {
+            <InputFile id="fileInput" hidden multiple/>
 
-			<MudButton HtmlTag="label"
-					   Variant="Variant.Filled"
-					   Color="Color.Primary"
-					   StartIcon="@Icons.Filled.CloudUpload"
-					   for="fileInput">
-				Upload Document
-			</MudButton>
-		}
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Filled.CloudUpload"
+                       for="fileInput">
+                Upload Document
+            </MudButton>
+        }
 
-		<MudAutocomplete T="Category" Label="Category" @bind-Value="_category" CoerceText="false" 
-			CoerceValue="true" SearchFunc="@SearchCategories" ResetValueOnEmptyText="true" 
-			AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddCategory"
-			ToStringFunc="@(c => c?.Name)"/>
+        <MudAutocomplete T="Category" Label="Category" @bind-Value="_category" CoerceText="false"
+                         CoerceValue="true" SearchFunc="@SearchCategories" ResetValueOnEmptyText="true"
+                         AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddCategory"
+                         ToStringFunc="@(c => c?.Name)"/>
 
-		<MudAutocomplete T="Author" Label="Author" @bind-Value="_author"
-			SearchFunc="@SearchAuthors" ToStringFunc="@(a => a == null ? null : $"{a.FirstName} {a.LastName}")"
-			AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddAuthor"/>
-	</MudForm>
+        @if (_category != null)
+        {
+            <MudAutocomplete T="SubCategory" Label="Sub Category" @bind-Value="_subCategory" CoerceText="false"
+                             CoerceValue="true" SearchFunc="@SearchSubCategories" ResetValueOnEmptyText="true"
+                             AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddSubCategory"
+                             ToStringFunc="@(c => c?.Name)"/>
+        }
+
+        <MudAutocomplete T="Author" Label="Author" @bind-Value="_author"
+                         SearchFunc="@SearchAuthors" ToStringFunc="@(a => a == null ? null : $"{a.FirstName} {a.LastName}")"
+                         AdornmentIcon="@Icons.Filled.Add" OnAdornmentClick="AddAuthor"/>
+        
+        <MudAutocomplete T="Tag" Label="Add Tags"  CoerceValue="true" CoerceText="false" ValueChanged="AddTag" OnKeyUp="AddNewTag"
+                         SearchFunc="@SearchTags" ToStringFunc="@(a => a?.Name)" @ref="_tagAutocompleteField"/>
+        
+        <MudChipSet Class="pa-4" AllClosable="true" OnClose="RemoveTag">
+            @foreach(var tag in _tags)
+            {
+                <MudChip Text="@tag"/>
+            }
+        </MudChipSet>
+
+        <MudButton OnClick="CreateAsync" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success || _saving)" Class="ml-auto">Create</MudButton>
+    </MudForm>
 }
 
 @code {
-	[CascadingParameter(Name = "UserId")] private int _userId { get; set; }
 
-	private bool _loaded;
+    [CascadingParameter(Name = "UserId")]
+    private int UserId { get; set; }
 
-	private List<Author> _authors = null!;
-	private List<Category> _categories = null!;
-	private List<ResourceType> _resourceTypes = null!;
+    private bool _loaded;
 
-	private bool _success;
-	private string[] _errors = { };
+    private List<Author> _authors = null!;
+    private List<Category> _categories = null!;
+    private List<ResourceType> _resourceTypes = null!;
 
-	private Author? _author;
-	private ResourceType _resourceType = null!;
-	private Category? _category;
+    private bool _success;
+    private bool _saving;
+    private string[] _errors = { };
 
-	protected override async Task OnInitializedAsync()
-	{
-		_authors = await AuthorService.GetAllAsync();
-		_categories = await CategoryService.GetAllAsync();
-		_resourceTypes = ResourceTypeService.GetAll();
+    private Author? _author;
+    private string _resourceName = string.Empty;
+    private string _uri = string.Empty;
+    private ResourceType _resourceType = null!;
+    private Category? _category;
+    private SubCategory? _subCategory;
+    private List<Tag> _allTags = new();
+    private readonly List<string> _tags = new();
+    private MudAutocomplete<Tag> _tagAutocompleteField = null!;
 
-		await base.OnInitializedAsync();
+    private async Task AddTag(Tag? tag)
+    {
+        if (tag is null)
+        {
+            return;
+        }
 
-		_resourceType = _resourceTypes.Single(x => x.Id == ResourceTypeEnum.Uri);
+        if (_tags.All(x => x != tag.Name))
+        {
+            _tags.Add(tag.Name);    
+        }
+        
+        await _tagAutocompleteField.Clear();
+    }
 
-		_loaded = true;
-	}
+    private void RemoveTag(MudChip chip) => _tags.Remove(chip.Text);
+    
+    private async Task AddNewTag(KeyboardEventArgs e)
+    {
+        var value = _tagAutocompleteField.Text?.TrimEnd(';');
+        if (e.Key == ";" && !string.IsNullOrEmpty(value))
+        {
+            if (_tags.All(x => x != value))
+            {
+                var tag = _allTags.FirstOrDefault(t => t.Name == value);
+                if (tag is null)
+                {
+                    tag = new Tag { Name = value };
+                    _allTags.Add(tag);
+                }
+                
+                _tags.Add(tag.Name);
+            }
 
-	private Task<IEnumerable<Author>> SearchAuthors(string value)
-	{
-		if (string.IsNullOrEmpty(value))
-		{
-			return Task.FromResult(_authors.AsEnumerable());
-		}
+            await _tagAutocompleteField.Clear();
+        }
+    }
 
-		return Task.FromResult(_authors.Where(x => $"{x.FirstName} {x.LastName}".Contains(value, StringComparison.InvariantCultureIgnoreCase)));
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        _authors = await AuthorService.GetAllAsync();
+        _categories = await CategoryService.GetAllAsync();
+        _resourceTypes = ResourceTypeService.GetAll();
+        _allTags = await TagService.GetAllAsync();
 
-	private Task<IEnumerable<Category>> SearchCategories(string value)
-	{
-		if(string.IsNullOrEmpty(value))
-		{
-			return Task.FromResult(_categories.AsEnumerable());
-		}
+        await base.OnInitializedAsync();
 
-		return Task.FromResult(_categories.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
-	}
+        _resourceType = _resourceTypes.Single(x => x.Id == ResourceTypeEnum.Uri);
 
-	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
-	{
-		new BreadcrumbItem("Resources", href: "resources"),
-		new BreadcrumbItem("New Resouce", href: null, disabled: true)
-	};
+        _loaded = true;
+    }
 
-	private async Task AddCategory()
-	{
-		var parameters = new DialogParameters();
-		parameters.Add("TitleText", "Add Category");
-		parameters.Add("FieldName", "Category Name");
+    private Task<IEnumerable<Author>> SearchAuthors(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return Task.FromResult(_authors.AsEnumerable());
+        }
 
-		var dialog = DialogService.Show<SimpleTextInputDialog>("Add Category", parameters);
-		var result = await dialog.Result;
+        return Task.FromResult(_authors.Where(x => $"{x.FirstName} {x.LastName}".Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+    }
 
-		if (!result.Cancelled)
-		{
-			var newCategory = new Category { Name = (string)result.Data };
-			_categories.Add(newCategory);
-			_category = newCategory;
-		}
-	}
+    private Task<IEnumerable<Category>> SearchCategories(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return Task.FromResult(_categories.AsEnumerable());
+        }
 
-	private async Task AddAuthor()
-	{
-		var dialog = DialogService.Show<NewAuthorDialog>("Add Author");
-		var result = await dialog.Result;
+        return Task.FromResult(_categories.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+    }
 
-		if(!result.Cancelled)
-		{
-			var author = (Author)result.Data;
-			_authors.Add(author);
-			_author = author;
-		}
-	}
+    private Task<IEnumerable<SubCategory>> SearchSubCategories(string value)
+    {
+        var subCategories = _category!.SubCategories ?? new List<SubCategory>();
+        if (string.IsNullOrEmpty(value))
+        {
+            return Task.FromResult(subCategories.AsEnumerable());
+        }
+
+        return Task.FromResult(subCategories.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+    }
+    
+    private async Task<IEnumerable<Tag>> SearchTags(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return await Task.FromResult(_allTags.AsEnumerable());
+        }
+
+        return await Task.FromResult(_allTags.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+    }
+
+    private readonly List<BreadcrumbItem> _breadcrumbItems = new()
+    {
+        new BreadcrumbItem("Resources", href: "resources"),
+        new BreadcrumbItem("New Resource", href: null, disabled: true)
+    };
+
+    private async Task AddCategory()
+    {
+        var parameters = new DialogParameters
+        {
+            { "TitleText", "Add Category" },
+            { "FieldName", "Category Name" }
+        };
+
+        var dialog = DialogService.Show<SimpleTextInputDialog>("Add Category", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var newCategory = new Category { Name = (string)result.Data };
+            _categories.Add(newCategory);
+            _category = newCategory;
+        }
+    }
+
+    private async Task AddSubCategory()
+    {
+        var parameters = new DialogParameters
+        {
+            { "TitleText", "Add Sub Category" },
+            { "FieldName", "Sub Category Name" }
+        };
+
+        var dialog = DialogService.Show<SimpleTextInputDialog>("Add Sub Category", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var subCategory = new SubCategory { Name = (string)result.Data };
+            _category!.SubCategories ??= new List<SubCategory>();
+            _category!.SubCategories.Add(subCategory);
+            _subCategory = subCategory;
+        }
+    }
+
+    private async Task AddAuthor()
+    {
+        var dialog = DialogService.Show<NewAuthorDialog>("Add Author");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var author = (Author)result.Data;
+            _authors.Add(author);
+            _author = author;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        _saving = true;
+
+        var model = new ResourceViewModel
+        {
+            Name = _resourceName,
+            Author = _author!,
+            Tags = _tags,
+            ResourceType = _resourceType.Id,
+            CategoryName = _category!.Name,
+            SubCategoryName = _subCategory!.Name,
+            Uri = _uri
+        };
+
+        await ResourceService.AddNewAsync(model);
+
+        NavigationManager.NavigateTo($"resources");
+    }
+
 }

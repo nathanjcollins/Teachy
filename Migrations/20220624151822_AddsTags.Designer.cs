@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Teachy.Data;
@@ -11,9 +12,10 @@ using Teachy.Data;
 namespace Teachy.Migrations
 {
     [DbContext(typeof(TeachyDbContext))]
-    partial class TeachyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220624151822_AddsTags")]
+    partial class AddsTags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

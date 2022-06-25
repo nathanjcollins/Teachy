@@ -1,4 +1,8 @@
 ﻿@page "/resources"
+@using Teachy.Data.Models
+@using Teachy.Services
+@inject CategoryService CategoryService
+@inject TagService TagService
 
 <PageTitle>Resources</PageTitle>
 <MudBreadcrumbs Items="_breadcrumbItems"></MudBreadcrumbs>
@@ -6,10 +10,45 @@
 
 <MudButton Class="mb-2" Href="resources/new" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Create New</MudButton>
 
+@if (_loaded)
+{
+    @if (_top10Categories.Any())
+    {
+        <MudText Typo="Typo.h4" GutterBottom="true">Popular Categories</MudText>
+        @foreach (var category in _top10Categories)
+        {
+            <MudChip Color="Color.Primary">@category.Name</MudChip>
+        }
+    }
+
+    if (_top10Tags.Any())
+    {
+        <MudText Typo="Typo.h4" GutterBottom="true">Popular Tags</MudText>
+        @foreach (var tag in _top10Tags)
+        {
+            <MudChip>@tag.Name</MudChip>
+        }
+    }
+}
 
 @code {
-	private List<BreadcrumbItem> _breadcrumbItems = new List<BreadcrumbItem>
-	{
-		new BreadcrumbItem("Resources", href: null, disabled: true)
-	};
+    private List<BreadcrumbItem> _breadcrumbItems = new()
+    {
+        new BreadcrumbItem("Resources", href: null, disabled: true)
+    };
+
+    private bool _loaded;
+    private List<Category> _top10Categories = null!;
+    private List<Tag> _top10Tags = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _top10Categories = await CategoryService.GetTop10Async();
+        _top10Tags = await TagService.GetTop10Async();
+        
+        await base.OnInitializedAsync();
+        
+        _loaded = true;
+    }
+
 }
